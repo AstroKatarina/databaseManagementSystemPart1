@@ -9,8 +9,6 @@ print ("Press 3 to Close the Database.\nPress 4 to Display a Record.")
 print ("Press 5 to Update a Record.\nPress 6 to Create a Record.")
 print ("Press 7 to Add a Record.\nPress 8 to Delete a Record.\nPress 9 to Quit the Program.\n")
 
-
-
 #Take User Menu Input
 while True:
 	try:
