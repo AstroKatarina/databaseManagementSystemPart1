@@ -1,181 +1,78 @@
 import csv
-import os.path
+import os
 
 class DB:
-
-    #default constructor
     def __init__(self):
-        self.filestream = None
-        self.num_record = 0
-        self.Id_size=10
-        self.firstName_size = 25
-        self.lastName_size = 25
-        self.age_size = 4
-        self.ticketNum_size = 25
-        self.fare_size = 8
-        self.dateOfPurchase_size = 15
-        
-        
-        self.Experience_size=5
-        self.Marriage_size=5
-        self.Wage_size=30
-        self.Industry_size=20
-
-
-    #create database
-    def createDB(self,filename):
-        #Generate file names
-        csv_filename = filename + ".csv"
-        text_filename = filename + ".data"
-
-        # Read the CSV file and write into data files
-        with open(csv_filename, "r") as csv_file:
-            data_list = list(csv.DictReader(csv_file,fieldnames=('passengerID','firstName','lastName','age','ticketNum', 'fare', 'dateOfPurchase')))
-
-		# Formatting files with spaces so each field is fixed length, i.e. ID field has a fixed length of 10
-        def writeDB(filestream, dict):
-            filestream.write("{:{width}.{width}}".format(dict["passengerID"],width=self.Id_size))
-            filestream.write("{:{width}.{width}}".format(dict["firstName"],width=self.firstName_size))
-            filestream.write("{:{width}.{width}}".format(dict["lastName"],width=self.lastName_size))
-            filestream.write("{:{width}.{width}}".format(dict["age"],width=self.age_size))
-            filestream.write("{:{width}.{width}}".format(dict["ticketNum"],width=self.ticketNum_size))
-            filestream.write("{:{width}.{width}}".format(dict["fare"],width=self.fare_size))
-            filestream.write("{:{width}.{width}}".format(dict["dateOfPurchase"],width=self.dateOfPurchase_size))
-            filestream.write("\n")
-
-
-            #write an empty records
-            filestream.write("{:{width}.{width}}".format('_empty_',width=self.Id_size))
-            filestream.write("{:{width}.{width}}".format(' ',width=self.firstName_size))
-            filestream.write("{:{width}.{width}}".format(' ',width=self.lastName_size))
-            filestream.write("{:{width}.{width}}".format(' ',width=self.age_size))
-            filestream.write("{:{width}.{width}}".format(' ',width=self.ticketNum_size))
-            filestream.write("{:{width}.{width}}".format(' ',width=self.fare_size))
-            filestream.write("{:{width}.{width}}".format(' ',width=self.dateOfPurchase_size))
-            filestream.write("\n")
-
-
-
-        recordCount = 0
-
-        with open(text_filename,"w") as outfile:
-            for dict in data_list:
-                writeDB(outfile,dict)
-                recordCount += 1
-
-    #read the database
-    def readDB(self, filename, DBsize, rec_size):
-        self.filestream = filename + ".data"
-        self.record_size = DBsize
-        self.rec_size = rec_size
-        
-        if not os.path.isfile(self.filestream):
-            print(str(self.filestream)+" not found")
-        else:
-            self.text_filename = open(self.filestream, 'r+')
-
-    #read record method
-    def getRecord(self, recordNum):
-
-        self.flag = False
-        id = experience = marriage = wage = industry = "None"
-
-        if recordNum >=0 and recordNum < self.record_size:
-            self.text_filename.seek(0,0)
-            self.text_filename.seek(recordNum*self.rec_size)
-            line= self.text_filename.readline().rstrip('\n')
-            self.flag = True
-        
-        if self.flag:
-            id = line[0:10]
-            experience = line[10:15]
-            marriage = line[15:20]
-            wage = line[20:40]
-            industry = line[40:70]
-            self.record = dict({"ID":id,"experience":experience,"marriage":marriage,"wages":wage,"industry":industry})
-
-    #Binary Search by record id
-    def binarySearch(self, input_ID):
-        low = 0
-        high = self.record_size - 1
-        found = False
-        self.recordNum = None  # Initialize the insertion point
-
-        while not found and high >= low:
-            self.middle = (low + high) // 2
-            self.getRecord(self.middle)
-            mid_id = self.record["ID"]
-
-            if mid_id.strip() == "_empty_":
-                non_empty_record = self.findNearestNonEmpty(self.middle, low, high)
-                if non_empty_record == -1:
-                    # If no non-empty record found, set recordNum for potential insertion
-                    self.recordNum = high 
-                    print("Could not find record with ID..", input_ID)
-                    return False
-
-                self.middle = non_empty_record
-                self.getRecord(self.middle)
-                mid_id = self.record["ID"]
-                if int(mid_id) > int(input_ID):
-                    self.recordNum = self.middle - 1
-                else:
-                    self.recordNum = self.middle + 1
-
-            if mid_id != "_empty_":
-                try:
-                    if int(mid_id) == int(input_ID):
-                        found = True
-                        self.recordNum = self.middle
-                    elif int(mid_id) > int(input_ID):
-                        high = self.middle - 1
-                    elif int(mid_id) < int(input_ID):
-                        low = self.middle + 1
-                except ValueError:
-                    # Handle non-integer IDs
-                    high = self.middle - 1
-
-        if not found and self.recordNum is None:
-            # Set recordNum to high + 1 if no suitable spot is found
-            self.recordNum = high 
-            print("Could not find record with ID", input_ID)
-
-        return found
-
-
+        self.recordSize = 0
+        self.numRecords = 0
+        self.dataFileptr = None
     
+    def open(self, fileName):
+        csv_file = f"{fileName}.csv"
+        data_file = f"{fileName}.data"
+        try:
+            with open(csv_file, "r") as csv_file:
+                self.numRecords, self.recordSize = map(int, csv_file.readline().split())
+            self.dataFileptr = open(data_file, "r+")
+            return True
+        except:
+            print(f"Database {fileName} not found.")
+            return False
+    
+    def close(self):
+        if self.dataFileptr:
+            self.dataFileptr.close()
+        self.recordSize = 0
+        self.numRecords = 0
+        self.dataFileptr = None
+    
+    def isOpen(self):
+        return self.dataFileptr is not None
+    
+    def readRecord(self, recordNum):
+        if not self.isOpen() or not (0 <= recordNum < self.numRecords):
+            return -1
+        self.dataFileptr.seek(recordNum * self.recordSize)
+        record = self.dataFileptr.read(self.recordSize)
+        if record.startswith("_empty_"):
+            return 0
+        
+        #stuff to parse records
 
-    def findNearestNonEmpty(self, start, low_limit, high_limit):
-        step = 1  # Initialize step size
+        return 1
+    
+    def writeRecord(self, recordNum, passengerID, fname, lname, age, ticketNum, fare, date):
+        if not self.isOpen() or not (0 <= recordNum < self.numRecords):
+            return -1
+        self.dataFileptr.seek(recordNum * self.recordSize)
+        
+        #add write record stuff
 
-        while True:
-            # Check backward
-            if start - step >= low_limit:
-                self.getRecord(start - step)
-                if self.record["ID"].strip() != "_empty_":
-                    #print(self.record)
-                    return start - step
+        return 1 #add something to return 0 when overwritting an empty
+    
+    def binarySearch(self, passengerID):
+        #implement binary search
 
-            # Check forward
-            if start + step <= high_limit:
-                self.getRecord(start + step)
-                if self.record["ID"].strip() != "_empty_":
-                    #print(self.record)
-                    return start + step
+        return False, -1 #if not found
+    
+    def updateRecord(self, passengerID, fname, lname, age, ticketNum, fare, date):
+        found, recordNum = self.binarySearch(passengerID)
 
-            # Increase step size and repeat
-            step += 1
-
-            # Terminate if beyond the search range
-            if start - step < low_limit and start + step > high_limit:
-                break
-
-        return -1  # No non-empty record found
-
-
-
-
-    #close the database
-    def CloseDB(self):
-
-        self.text_filename.close()
+        if found:
+            self.writeRecord(recordNum, passengerID, fname, lname, age, ticketNum, fare, date)
+            return True
+        return False
+    
+    def deleteRecord(self, passengerID):
+        found, recordNum = self.binarySearch(passengerID)
+        
+        if found:
+            self.writeRecord(recordNum, "_empty_", "", "", "", "", "","")
+            return True
+        return False
+    
+    def addRecord(self, passengerID, fname, lname, age, ticketNum, fare, date):
+        if not self.isOpen():
+            return False
+        #add logic
+        return True
