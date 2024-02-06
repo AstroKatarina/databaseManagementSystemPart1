@@ -25,6 +25,7 @@ def display_menu():
     print("7 - Add a Record")
     print("8 - Delete a Record")
     print("9 - Quit the Program")
+    print("10 - Read Record Test")
 
 def process_user_input(userInput, db):
     if userInput == 1:
@@ -34,8 +35,11 @@ def process_user_input(userInput, db):
         
     elif userInput == 2:
         print("You have chosen to open an existing database.")
-        filename = input("please input the name of the database you would like to open: ")
-        db.open(filename)
+        if not db.isOpen():
+            filename = input("please input the name of the database you would like to open: ")
+            db.open(filename)
+        else:
+            print("Database is already open. Please close the previous database before opening a new one.")
         
     elif userInput == 3:
         print("You have chosen to close the database.")
@@ -43,8 +47,8 @@ def process_user_input(userInput, db):
         
     elif userInput == 4:
         print("You have chosen to display a record.")
-        recordNum = int(input("please input the reocrd number you would like to view: "))
-        db.readRecord(recordNum)
+        recordNum = int(input("please input the record number you would like to view: "))
+        db.binarySearch(recordNum)
         
     elif userInput == 5:
         print("You have chosen to update a record in the database.")
@@ -62,8 +66,14 @@ def process_user_input(userInput, db):
         print("You have chosen to delete a record from the database.")
         # Call a function to delete a record
         
+    elif userInput == 10:
+        print("Testing Read Record Function")
+        recordNum = int(input("Please input the Id you would like to test: "))
+        db.readRecord(recordNum)
     else:
         print("Invalid option. Please enter a number between 1 and 9.")
+
+
 
 if __name__ == "__main__":
     main()
