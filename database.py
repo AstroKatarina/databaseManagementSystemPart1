@@ -76,6 +76,8 @@ class DB:
             print("\nError reading the config file.")
             self.dataFileptr = None
             return False
+        
+        config_file.close()
 
         # Open the Data file
         try:
