@@ -5,6 +5,7 @@ class DB:
     def __init__(self):
         self.recordSize = 0
         self.numRecords = 0
+        self.index = 0
         self.dataFileptr = None
         self.Id_size = 10
         self.fname_size = 25
@@ -106,9 +107,8 @@ class DB:
     def readRecord(self, recordNum):
         self.flag = False
         passengerID = fname = lname = age = ticketNum = fare = date = "None"
-        print(self.recordSize)
-
-        if not self.isOpen() or not (0<= recordNum < self.numRecords):
+        self.index = recordNum
+        if not self.isOpen() or not (0 <= recordNum < self.numRecords):
             print("\nDatabase not opened, or invalid input")
             return -1
         
@@ -117,10 +117,9 @@ class DB:
             self.data_filename.seek(recordNum * self.recordSize)
             line = self.data_filename.readline().rstrip()
             self.flag = True
-            print("\n"+line)
 
             if line.startswith("_empty_"):
-                print("empty")
+                self.record = dict({"passengerID": "_empty_"})
                 return 0
         
         if self.flag:
@@ -132,21 +131,41 @@ class DB:
             fare = line[89:97]
             date = line[97:113]
             self.record = dict({"passengerID":passengerID,"fname":fname,"lname":lname,"age":age,"ticketNum":ticketNum,"fare":fare,"date":date})
-            print(f"Passenger ID: {self.record['passengerID'].strip()}, First Name: {self.record['fname'].strip()}, Last name: {self.record['lname'].strip()}, Age: {self.record['age'].strip()}, Ticket Number: {self.record['ticketNum'].strip()}, Fare: {self.record['fare'].strip()}, Date: {self.record['date'].strip()}")
+            
             return 1
     
     def writeRecord(self, recordNum, passengerID, fname, lname, age, ticketNum, fare, date):
         if not self.isOpen() or not (0 <= recordNum < self.numRecords):
             return -1
-        self.dataFileptr.seek(recordNum * self.recordSize)
         
-        #add write record stuff
+        if recordNum >= 0 and recordNum < self.recordSize:
+            self.data_filename.seek(0,0)
+            self.data_filename.seek(recordNum * self.recordSize)
+            line = self.data_filename.readline().rstrip()
 
-        return 1 #add something to return 0 when overwritting an empty
+            if not line.startswith("_empty_"):
+                self.data_filename.write("{:{width}.{width}}".format(passengerID,width=self.Id_size))
+                self.data_filename.write("{:{width}.{width}}".format(fname,width=self.fname_size))
+                self.data_filename.write("{:{width}.{width}}".format(lname,width=self.lname_size))
+                self.data_filename.write("{:{width}.{width}}".format(age,width=self.age_size))
+                self.data_filename.write("{:{width}.{width}}".format(ticketNum,width=self.ticketNum_size))
+                self.data_filename.write("{:{width}.{width}}".format(fare,width=self.fare_size))
+                self.data_filename.write("{:{width}.{width}}".format(date,width=self.date_size))
+                return 1
+            
+            else:
+                self.data_filename.write("{:{width}.{width}}".format(passengerID,width=self.Id_size))
+                self.data_filename.write("{:{width}.{width}}".format(fname,width=self.fname_size))
+                self.data_filename.write("{:{width}.{width}}".format(lname,width=self.lname_size))
+                self.data_filename.write("{:{width}.{width}}".format(age,width=self.age_size))
+                self.data_filename.write("{:{width}.{width}}".format(ticketNum,width=self.ticketNum_size))
+                self.data_filename.write("{:{width}.{width}}".format(fare,width=self.fare_size))
+                self.data_filename.write("{:{width}.{width}}".format(date,width=self.date_size))
+                return 0
     
     def binarySearch(self, input_ID):
         low = 0
-        high = self.recordSize - 1
+        high = self.numRecords - 1
         found = False
         self.recordNum = None  # Initialize the insertion point
 
@@ -160,7 +179,7 @@ class DB:
                 if non_empty_record == -1:
                     # If no non-empty record found, set recordNum for potential insertion
                     self.recordNum = high 
-                    print(f"Could not find record with ID {input_ID}")
+                    print(f"\nCould not find record with ID {input_ID}")
                     return False
 
                 self.middle = non_empty_record
@@ -186,15 +205,16 @@ class DB:
 
         if not found and self.recordNum is None:
             # Set recordNum to high + 1 if no suitable spot is found
-            self.recordNum = high 
-            print(f"Could not find record with ID {input_ID}")
+            self.recordNum = high + 1
+            print(f"\nCould not find record with ID {input_ID}")
             return False
 
         print("\nEntry Found")
         print(f"Passenger ID: {self.record['passengerID'].strip()}, First Name: {self.record['fname'].strip()}, Last name: {self.record['lname'].strip()}, Age: {self.record['age'].strip()}, Ticket Number: {self.record['ticketNum'].strip()}, Fare: {self.record['fare'].strip()}, Date: {self.record['date'].strip()}")
         
 
-        return found
+        return found, self.index
+
     
     def findNearestNonEmpty(self, start, low_limit, high_limit):
         step = 1  # Initialize step size

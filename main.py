@@ -25,7 +25,6 @@ def display_menu():
     print("7 - Add a Record")
     print("8 - Delete a Record")
     print("9 - Quit the Program")
-    print("10 - Read Record Test")
 
 def process_user_input(userInput, db):
     if userInput == 1:
@@ -39,20 +38,33 @@ def process_user_input(userInput, db):
             filename = input("please input the name of the database you would like to open: ")
             db.open(filename)
         else:
-            print("Database is already open. Please close the previous database before opening a new one.")
+            print("\nDatabase is already open. Please close the previous database before opening a new one.")
         
     elif userInput == 3:
-        print("You have chosen to close the database.")
-        db.close()
+        if not db.isOpen():
+            print("\nNo database Open, Please open a database")
+        else:    
+            print("You have chosen to close the database.")
+            db.close()
         
     elif userInput == 4:
         print("You have chosen to display a record.")
-        recordNum = int(input("please input the record number you would like to view: "))
+        recordNum = int(input("please input the Id of the passenger you would like to view: "))
         db.binarySearch(recordNum)
         
     elif userInput == 5:
         print("You have chosen to update a record in the database.")
-        # Call a function to update a record
+        if not db.isOpen():
+            print("Please open a database before updating")
+        else:
+            ID = int(input("please input the passenger Id to update: "))
+            fname = input("please input the updated passengers first name: ")
+            lname = input("please input the updated passengers last name: ")
+            age = input("please input the updated passengers age: ")
+            ticketNum = input("please input the updated passengers ticket number: ")
+            fare = input("please input the updated passengers fare: ")
+            date = input("please input the date of purchase for the updated passenger: ")
+            db.updateRecord(ID, fname, lname, age, ticketNum, fare, date)
         
     elif userInput == 6:
         print("You have chosen to create a report for the database.")
@@ -65,11 +77,6 @@ def process_user_input(userInput, db):
     elif userInput == 8:
         print("You have chosen to delete a record from the database.")
         # Call a function to delete a record
-        
-    elif userInput == 10:
-        print("Testing Read Record Function")
-        recordNum = int(input("Please input the Id you would like to test: "))
-        db.readRecord(recordNum)
     else:
         print("Invalid option. Please enter a number between 1 and 9.")
 
