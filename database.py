@@ -5,7 +5,6 @@ class DB:
     def __init__(self):
         self.recordSize = 0
         self.numRecords = 0
-        self.index = 0
         self.dataFileptr = None
         self.Id_size = 10
         self.fname_size = 25
@@ -142,6 +141,8 @@ class DB:
             self.data_filename.seek(0,0)
             self.data_filename.seek(recordNum * self.recordSize)
             line = self.data_filename.readline().rstrip()
+            self.data_filename.seek(0,0)
+            self.data_filename.seek(recordNum * self.recordSize)
 
             if not line.startswith("_empty_"):
                 self.data_filename.write("{:{width}.{width}}".format(passengerID,width=self.Id_size))
@@ -178,17 +179,17 @@ class DB:
                 non_empty_record = self.findNearestNonEmpty(self.middle, low, high)
                 if non_empty_record == -1:
                     # If no non-empty record found, set recordNum for potential insertion
-                    self.recordNum = high 
+                    self.recordNum = high
                     print(f"\nCould not find record with ID {input_ID}")
-                    return False
+                    return False, self.recordNum
 
                 self.middle = non_empty_record
                 self.readRecord(self.middle)
                 mid_id = self.record["passengerID"]
                 if int(mid_id) > int(input_ID):
-                    self.recordNum = self.middle - 1
+                    index = self.middle - 1
                 else:
-                    self.recordNum = self.middle + 1
+                    index = self.middle + 1
 
             if mid_id != "_empty_":
                 try:
@@ -205,15 +206,14 @@ class DB:
 
         if not found and self.recordNum is None:
             # Set recordNum to high + 1 if no suitable spot is found
-            self.recordNum = high + 1
+            index = high + 1
             print(f"\nCould not find record with ID {input_ID}")
-            return False
+            return False, None
 
         print("\nEntry Found")
         print(f"Passenger ID: {self.record['passengerID'].strip()}, First Name: {self.record['fname'].strip()}, Last name: {self.record['lname'].strip()}, Age: {self.record['age'].strip()}, Ticket Number: {self.record['ticketNum'].strip()}, Fare: {self.record['fare'].strip()}, Date: {self.record['date'].strip()}")
         
-
-        return found, self.index
+        return found, self.recordNum
 
     
     def findNearestNonEmpty(self, start, low_limit, high_limit):
@@ -245,23 +245,25 @@ class DB:
     
     
     def updateRecord(self, passengerID, fname, lname, age, ticketNum, fare, date):
-        found, recordNum = self.binarySearch(passengerID)
-
+        found, index = self.binarySearch(passengerID)
+        
         if found:
-            self.writeRecord(recordNum, passengerID, fname, lname, age, ticketNum, fare, date)
+            self.writeRecord(index, passengerID, fname, lname, age, ticketNum, fare, date)
+            print("Entry Updated")
             return True
         return False
     
     def deleteRecord(self, passengerID):
-        found, recordNum = self.binarySearch(passengerID)
+        found, index = self.binarySearch(passengerID)
         
         if found:
-            self.writeRecord(recordNum, "_empty_", "", "", "", "", "","")
+            self.writeRecord(index, "_empty_", "", "", "", "", "","")
+            print("Entry Deleted")
             return True
         return False
     
     def addRecord(self, passengerID, fname, lname, age, ticketNum, fare, date):
         if not self.isOpen():
             return False
-        #add logic
+        print(self.recordNum)
         return True

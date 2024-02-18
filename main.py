@@ -49,15 +49,18 @@ def process_user_input(userInput, db):
         
     elif userInput == 4:
         print("You have chosen to display a record.")
-        recordNum = int(input("please input the Id of the passenger you would like to view: "))
-        db.binarySearch(recordNum)
+        if not db.isOpen():
+            print("\nPlease open the database before searching for a record")
+        else:
+            recordNum = int(input("please input the Id of the passenger you would like to view: "))
+            db.binarySearch(recordNum)
         
     elif userInput == 5:
         print("You have chosen to update a record in the database.")
         if not db.isOpen():
-            print("Please open a database before updating")
+            print("\nPlease open a database before updating")
         else:
-            ID = int(input("please input the passenger Id to update: "))
+            ID = input("\nplease input the passenger Id to update: ")
             fname = input("please input the updated passengers first name: ")
             lname = input("please input the updated passengers last name: ")
             age = input("please input the updated passengers age: ")
@@ -72,11 +75,26 @@ def process_user_input(userInput, db):
         
     elif userInput == 7:
         print("You have chosen to add a record to the database.")
-        # Call a function to add a record
+        if not db.isOpen():
+            print("\nPlease open a database before adding a record")
+        else:
+            ID = input("\nplease input the passenger Id to add: ")
+            fname = input("please input the new passengers first name: ")
+            lname = input("please input the new passengers last name: ")
+            age = input("please input the new passengers age: ")
+            ticketNum = input("please input the new passengers ticket number: ")
+            fare = input("please input the new passengers fare: ")
+            date = input("please input the date of purchase for the new passenger: ")
+            db.addRecord(ID, fname, lname, age, ticketNum, fare, date)
         
     elif userInput == 8:
-        print("You have chosen to delete a record from the database.")
-        # Call a function to delete a record
+        print("You have chosen to delte a record from the database.")
+        if not db.isOpen():
+            print("\nPlease open a database before deleting a record")
+        else:
+            ID = input("Please input the record that you would like to delete: ")
+            db.deleteRecord(ID)
+
     else:
         print("Invalid option. Please enter a number between 1 and 9.")
 
