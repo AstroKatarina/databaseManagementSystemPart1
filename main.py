@@ -12,7 +12,8 @@ def main():
             process_user_input(userInput, db)
         except ValueError:
             print("Invalid input. Please enter a number between 1 and 9.")
-
+            userInput = 0
+            
 def display_menu():
     print("\nWelcome to the Database Management System!")
     print("Here is what is on the menu:")
@@ -60,6 +61,24 @@ def process_user_input(userInput, db):
         if not db.isOpen():
             print("\nPlease open a database before updating")
         else:
+<<<<<<< HEAD
+            ID = int(input("please input the passenger Id to update: "))
+            # Search for the record number corresponding to the given ID
+            recordNum = db.binarySearch(ID)
+            if recordNum is not None:
+                fname = input("please input the updated passenger's first name: ")
+                lname = input("please input the updated passenger's last name: ")
+                age = input("please input the updated passenger's age: ")
+                ticketNum = input("please input the updated passenger's ticket number: ")
+                fare = input("please input the updated passenger's fare: ")
+                date = input("please input the date of purchase for the updated passenger: ")
+                # Call writeRecord with the found recordNum
+                db.writeRecord(recordNum, ID, fname, lname, age, ticketNum, fare, date)
+            else:
+                print("Passenger ID not found.") 
+        return
+    
+=======
             ID = input("\nplease input the passenger Id to update: ")
             fname = input("please input the updated passengers first name: ")
             lname = input("please input the updated passengers last name: ")
@@ -69,9 +88,11 @@ def process_user_input(userInput, db):
             date = input("please input the date of purchase for the updated passenger: ")
             db.updateRecord(ID, fname, lname, age, ticketNum, fare, date)
         
+>>>>>>> e3137e9108408ed3215774830e3ccc26dae682af
     elif userInput == 6:
         print("You have chosen to create a report for the database.")
         # Call a function to create a report
+        db.createRecord()
         
     elif userInput == 7:
         print("You have chosen to add a record to the database.")

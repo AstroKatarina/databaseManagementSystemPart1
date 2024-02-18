@@ -18,9 +18,21 @@ class DB:
 
     def createDatabase(self, filename):
         csv_filename = filename + ".csv"
+<<<<<<< HEAD
+        text_filename = filename + ".data"
+        config_filename = filename + ".config"
+=======
         data_filename = filename + ".data"
         config_filename= filename + ".config"
+>>>>>>> 47b1f4ca87e8b9fc18e8a8abc1b1feccfa758449
 
+<<<<<<< HEAD
+        #each line has size ->
+        charLengthPerLine = (self.Id_size + self.firstName_size + self.lastName_size + self.age_size + self.ticketNum_size + self.fare_size + self.dateOfPurchase_size)
+
+        # Read the CSV file and write into data files
+=======
+>>>>>>> 47b1f4ca87e8b9fc18e8a8abc1b1feccfa758449
         with open(csv_filename, "r") as csv_file:
             data_list = list(csv.DictReader(csv_file, fieldnames = ('passengerID', 'fname', 'lname', 'age', 'ticketNum', 'fare', 'date')))
 
@@ -43,10 +55,16 @@ class DB:
             filestream.write("{:{width}.{width}}".format('',width=self.date_size))
             filestream.write("\n")
 
+        def writeConfig(filestream):
+            filestream.write("There are " + self.num_record + " records.")
         with open(data_filename, "w") as outfile:
             for dict in data_list:
                 writeDB(outfile, dict)
 
+        with open(text_filename,"w") as outfile:
+            for dict in data_list:
+                writeDB(outfile,dict)
+                self.num_record += 1
         recordSize = self.Id_size + self.fname_size + self.lname_size + self.age_size + self.ticketNum_size + self.fare_size + self.date_size + 1
     
         with open(config_filename, "w") as config_file:
@@ -67,10 +85,21 @@ class DB:
                         self.recordSize = int(line.split(":")[1].strip())
                 
 
+<<<<<<< HEAD
+        with open(config_filename, "w") as outfile:
+            writeConfig(outfile)
+
+    #read the database
+    def readDB(self, filename, DBsize, rec_size):
+        self.filestream = filename + ".data"
+        self.record_size = DBsize
+        self.rec_size = rec_size
+=======
         except FileNotFoundError:
             print(f"\nConfig file {config_filename} not found.")
             self.dataFileptr = None
             return False
+>>>>>>> 47b1f4ca87e8b9fc18e8a8abc1b1feccfa758449
         
         except ValueError:
             print("\nError reading the config file.")
@@ -137,32 +166,35 @@ class DB:
         if not self.isOpen() or not (0 <= recordNum < self.numRecords):
             return -1
         
+<<<<<<< HEAD
+        self.data_filename.seek(0, 0)
+        self.data_filename.seek(recordNum * self.recordSize)
+        line = self.data_filename.readline().rstrip()
+=======
         if recordNum >= 0 and recordNum < self.recordSize:
             self.data_filename.seek(0,0)
             self.data_filename.seek(recordNum * self.recordSize)
             line = self.data_filename.readline().rstrip()
             self.data_filename.seek(0,0)
             self.data_filename.seek(recordNum * self.recordSize)
+>>>>>>> e3137e9108408ed3215774830e3ccc26dae682af
 
-            if not line.startswith("_empty_"):
-                self.data_filename.write("{:{width}.{width}}".format(passengerID,width=self.Id_size))
-                self.data_filename.write("{:{width}.{width}}".format(fname,width=self.fname_size))
-                self.data_filename.write("{:{width}.{width}}".format(lname,width=self.lname_size))
-                self.data_filename.write("{:{width}.{width}}".format(age,width=self.age_size))
-                self.data_filename.write("{:{width}.{width}}".format(ticketNum,width=self.ticketNum_size))
-                self.data_filename.write("{:{width}.{width}}".format(fare,width=self.fare_size))
-                self.data_filename.write("{:{width}.{width}}".format(date,width=self.date_size))
-                return 1
-            
-            else:
-                self.data_filename.write("{:{width}.{width}}".format(passengerID,width=self.Id_size))
-                self.data_filename.write("{:{width}.{width}}".format(fname,width=self.fname_size))
-                self.data_filename.write("{:{width}.{width}}".format(lname,width=self.lname_size))
-                self.data_filename.write("{:{width}.{width}}".format(age,width=self.age_size))
-                self.data_filename.write("{:{width}.{width}}".format(ticketNum,width=self.ticketNum_size))
-                self.data_filename.write("{:{width}.{width}}".format(fare,width=self.fare_size))
-                self.data_filename.write("{:{width}.{width}}".format(date,width=self.date_size))
-                return 0
+        if not line.startswith("_empty_"):
+            self.data_filename.write("{:{width}.{width}}".format(passengerID, width=self.Id_size))
+            self.data_filename.write("{:{width}.{width}}".format(fname, width=self.fname_size))
+            self.data_filename.write("{:{width}.{width}}".format(lname, width=self.lname_size))
+            self.data_filename.write("{:{width}.{width}}".format(age, width=self.age_size))
+            self.data_filename.write("{:{width}.{width}}".format(ticketNum, width=self.ticketNum_size))
+            self.data_filename.write("{:{width}.{width}}".format(fare, width=self.fare_size))
+            self.data_filename.write("{:{width}.{width}}".format(date, width=self.date_size))
+            return 1
+
+        else:
+            self.data_filename.write("{:{width}.{width}}".format(passengerID, width=self.Id_size))
+            self.data_filename.write("{:{width}.{width}}".format(fname, width=self.fname_size))
+            self.data_filename.write("{:{width}.{width}}".format(lname, width=self.lname_size))
+            self.data_filename.write("{:{width}.{width}}".format(age, width=self.age_size))
+            self.data_filename.write("{:{width}.{width}}".format(ticketNum, width=self))
     
     def binarySearch(self, input_ID):
         low = 0
@@ -244,6 +276,8 @@ class DB:
         return -1  # No non-empty record found
     
     
+<<<<<<< HEAD
+=======
     def updateRecord(self, passengerID, fname, lname, age, ticketNum, fare, date):
         found, index = self.binarySearch(passengerID)
         
@@ -253,6 +287,7 @@ class DB:
             return True
         return False
     
+>>>>>>> e3137e9108408ed3215774830e3ccc26dae682af
     def deleteRecord(self, passengerID):
         found, index = self.binarySearch(passengerID)
         
@@ -267,3 +302,19 @@ class DB:
             return False
         print(self.recordNum)
         return True
+    
+    def createReport(self):
+        if not self.isOpen():
+            print("Database is not open.")
+            return
+
+        records = []
+        for i in range(self.numRecords):
+            if self.readRecord(i) == 1:
+                records.append(self.record)
+
+        sorted_records = sorted(records, key=lambda x: int(x['passengerID']))
+        print("First ten records sorted by passengerID:")
+        print("{:<12} {:<25} {:<25} {:<6} {:<25} {:<8} {:<15}".format('PassengerID', 'First Name', 'Last Name', 'Age', 'Ticket Number', 'Fare', 'Date'))
+        for record in sorted_records[:10]:
+            print("{:<12} {:<25} {:<25} {:<6} {:<25} {:<8} {:<15}".format(record['passengerID'], record['fname'], record['lname'], record['age'], record['ticketNum'], record['fare'], record['date']))
